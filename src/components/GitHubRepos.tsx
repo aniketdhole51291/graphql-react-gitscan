@@ -20,46 +20,21 @@ const GET_REPOS = gql`
   }
 `;
 
-
-const GET_REPOS_DETAILS = gql`
-query RepositoryDetails($username: String!, $token: String!, $repoName: String!) {
-    repositoryDetails(username: $username, token: $token, repoName: $repoName) {
-      id
-      name
-      url
-      owner {
-        login
-      }
-      diskUsage
-      visibility
-      fileCount
-      ymlFileContent
-      activeWebhooks
-    }
-  }
-`;
-
 interface RepositoriesData {
     repositories: Repository[];
     repositoryDetails: Repository;
 }
 
 const GitHubRepos = () => {
-    const [username, setUsername] = useState('sanjayrane');
-    const [selectRepo, setSelectRepo] = useState<Repository>();
+    const [username, setUsername] = useState('aniketdhole51291');
     const [repositoryDetails, setRepositoryDetails] = useState<Repository>();
     const [loader, setLoader] = useState<Boolean>(false);
-    const [loaderDetails, setLoaderDetails] = useState<Boolean>(false);
 
-    const [token, setToken] = useState('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');
+    const [token, setToken] = useState('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');
     const [repositories, setRepositories] = useState<Repository[]>([]);
 
     const { refetch } = useQuery<RepositoriesData>(GET_REPOS, {
         variables: { username, token },
-        skip: true,
-    });
-    const repoDetails = useQuery<RepositoriesData>(GET_REPOS_DETAILS, {
-        variables: { username, token, repoName: selectRepo?.name },
         skip: true,
     });
 
@@ -82,50 +57,18 @@ const GitHubRepos = () => {
         }
     };
 
-    const handleFetchDetailsRepositories = async () => {
-        if (username && token) {
-            try {
-                setLoaderDetails(true)
-                const result = await repoDetails.refetch({ username, token, repoName: selectRepo?.name });
-                if (result?.data?.repositoryDetails) {
-                    setRepositoryDetails(result?.data.repositoryDetails);
-                    setLoaderDetails(false)
-                } else {
-                    setLoaderDetails(false)
-                }
-            } catch (error: any) {
-                setLoaderDetails(false)
-                console.error('Error fetching repositoryDetails:', error.message);
-            }
-        }
-    };
-
-
-    useEffect(() => {
-        if (selectRepo?.name) {
-            handleFetchDetailsRepositories()
-        }
-    }, [selectRepo?.name])
-
     return (
         <div className='container'>
-            <h2>Your GitHub Repositories</h2>
-            <div className='row'>
-                <div className='col-4'>
-                    <div className="mb-3">
-                        <label htmlFor="username" className="form-label"> GitHub Username</label>
-                        <input type="text" className="form-control" id="username" placeholder="User Name" value={username} onChange={(e) => setUsername(e.target.value)} />
-                    </div>
+            <h2 className='text-center'>Your GitHub Repositories</h2>
+            <div className='row mt-5 mb-5'>
+                <div className='col-5'>
+                    <input type="text" className="form-control" id="username" placeholder="GitHub Username" value={username} onChange={(e) => setUsername(e.target.value)} />
                 </div>
-                <div className='col-4'>
-                    <div className="mb-3">
-                        <label htmlFor="Token" className="form-label"> GitHub Token</label>
-                        <input type="text" className="form-control" id="Token" placeholder="Token" value={token} onChange={(e) => setToken(e.target.value)} />
-                    </div>
+                <div className='col-5'>
+                    <input type="text" className="form-control" id="Token" placeholder="GitHub Token" value={token} onChange={(e) => setToken(e.target.value)} />                    
                 </div>
-                <div className='col-4 mt-4'>
-                    <button className="btn btn-primary" onClick={() => handleFetchRepositories()}>{loader ? "Loading..." : "Fetch Repositories"}</button>
-
+                <div className='col'>
+                    <button className="btn btn-primary btn-block" onClick={() => handleFetchRepositories()}>{loader ? "Loading..." : "Fetch Repositories"}</button>
                 </div>
             </div>
             <table className="table">
@@ -145,7 +88,7 @@ const GitHubRepos = () => {
                             <td>{repo.name}</td>
                             <td>{repo.diskUsage}</td>
                             <td>{repo.owner?.login}</td>
-                            <td><button type="button" className={repo.id === selectRepo?.id ? "btn btn-primary" : "btn btn-secondary"} data-bs-toggle="modal" data-bs-target="#exampleModal" onClick={() => setSelectRepo(repo)}>Details</button></td>
+                            <td><button type="button" className={"btn btn-primary"} data-bs-toggle="modal" data-bs-target="#exampleModal" onClick={() => setRepositoryDetails(repo)}>Details</button></td>
                         </tr>
                     ))}
                 </tbody>
@@ -159,42 +102,35 @@ const GitHubRepos = () => {
                         </div>
                         <div className="modal-body">
                             {
-                                loaderDetails ? <>
-                                    <div className="spinner-border" role="status">
-                                        <span className="visually-hidden">Loading...</span>
-                                    </div>
-
-                                </>
-                                    : <>
-                                        <div className='row'>
-                                            <div className='col-sm-6'>
-                                                <label className="form-label"> Repo Name : <b>{repositoryDetails?.name}</b> </label>
-                                            </div>
-                                            <div className='col-sm-6'>
-                                                <label className="form-label"> Repo Size : <b>{repositoryDetails?.diskUsage}</b></label>
-                                            </div>
-                                            <div className='col-sm-6'>
-                                                <label className="form-label"> Repo Owner: <b>{repositoryDetails?.owner?.login}</b></label>
-                                            </div>
-                                            <div className='col-sm-6'>
-                                                <label className="form-label"> Access: <b>{repositoryDetails?.visibility}</b></label>
-                                            </div>
-                                            <div className='col-sm-6'>
-                                                <label className="form-label"> Files: <b>{repositoryDetails?.fileCount}</b></label>
-                                            </div>
-                                            <div className='col-sm-6'>
-                                                <label className="form-label"> Content YML: <b>{repositoryDetails?.ymlFileContent}</b></label>
-                                            </div>
-                                            <div className='col-sm-6'>
-                                                <label className="form-label"> Ative Webhooks: <b>{repositoryDetails?.activeWebhooks}</b></label>
-                                            </div>
+                                <>
+                                    <div className='row'>
+                                        <div className='col-sm-6'>
+                                            <label className="form-label"> Repo Name : <b>{repositoryDetails?.name}</b> </label>
                                         </div>
-                                    </>
+                                        <div className='col-sm-6'>
+                                            <label className="form-label"> Repo Size : <b>{repositoryDetails?.diskUsage}</b></label>
+                                        </div>
+                                        <div className='col-sm-6'>
+                                            <label className="form-label"> Repo Owner: <b>{repositoryDetails?.owner?.login}</b></label>
+                                        </div>
+                                        <div className='col-sm-6'>
+                                            <label className="form-label"> Access: <b>{repositoryDetails?.visibility}</b></label>
+                                        </div>
+                                        <div className='col-sm-6'>
+                                            <label className="form-label"> Files: <b>{repositoryDetails?.fileCount}</b></label>
+                                        </div>
+                                        <div className='col-sm-6'>
+                                            <label className="form-label"> Content YML: <b>{repositoryDetails?.ymlFileContent}</b></label>
+                                        </div>
+                                        <div className='col-sm-6'>
+                                            <label className="form-label"> Ative Webhooks: <b>{repositoryDetails?.activeWebhooks}</b></label>
+                                        </div>
+                                    </div>
+                                </>
                             }
-
                         </div>
                         <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" className="btn btn-success" data-bs-dismiss="modal">Ok</button>
                         </div>
                     </div>
                 </div>

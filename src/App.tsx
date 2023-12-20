@@ -7,7 +7,7 @@ const App = () => {
     <div className="App">
       <main>
         <header className="App-header">
-          <h1>GitHub scanner</h1>
+          <h1 className='text-center m-4'>GitHub Scanner</h1>
         </header>
         <GitHubRepos />
       </main>
